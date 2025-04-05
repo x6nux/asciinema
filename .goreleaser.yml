@@ -87,14 +87,13 @@ builds:
       - "-X main.GitTag={{.Tag}} -X main.GitHash={{.ShortCommit}} -s -w"
 
 archives:
-  - format: binary
+  - format: zip
     name_template: >-
-      {{ .ProjectName }}
-      {{- if eq .Os "darwin" }}MacOS{{ else }}{{ title .Os }}{{ end }}
-      {{- if eq .Arch "386" }}I386
-      {{- else }}{{ title .Arch }}{{ end }}
-      {{- if .Arm }}V{{ .Arm }}{{ end }}
-      {{- if eq .Os "windows" }}.exe{{ end }}
+      {{ .ProjectName }}_
+      {{- if eq .Os "darwin" }}macOS{{ else }}{{ .Os }}{{ end }}_
+      {{- if eq .Arch "386" }}i386
+      {{- else }}{{ .Arch }}{{ end }}
+      {{- if .Arm }}_v{{ .Arm }}{{ end }}
 
 checksum:
   name_template: 'checksums.txt'
