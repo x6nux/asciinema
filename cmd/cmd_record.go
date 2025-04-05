@@ -4,8 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"os"
+	"os/signal"
 	"runtime"
 	"sync"
+	"syscall"
 
 	"github.com/gvcgo/asciinema/asciicast"
 	"github.com/gvcgo/asciinema/commands"
@@ -15,10 +17,11 @@ import (
 
 // 流式写入的结构体
 type StreamWriter struct {
-	file    *os.File
-	writer  *ndjson.Writer
-	mu      sync.Mutex
-	written bool
+	file     *os.File
+	writer   *ndjson.Writer
+	mu       sync.Mutex
+	written  bool
+	filePath string
 }
 
 // 创建新的流式写入器
@@ -35,10 +38,12 @@ func NewStreamWriter(filepath string, header *asciicast.Header) (*StreamWriter, 
 		return nil, err
 	}
 
+	// 设置文件缓冲区以减少写入操作数量
 	return &StreamWriter{
-		file:    file,
-		writer:  ndjson.NewWriter(file),
-		written: true,
+		file:     file,
+		writer:   ndjson.NewWriter(file),
+		written:  true,
+		filePath: filepath,
 	}, nil
 }
 
@@ -47,7 +52,18 @@ func (sw *StreamWriter) WriteFrame(frame asciicast.Frame) error {
 	sw.mu.Lock()
 	defer sw.mu.Unlock()
 
-	return sw.writer.Encode([]interface{}{frame.Time, "o", string(frame.EventData)})
+	err := sw.writer.Encode([]interface{}{frame.Time, "o", string(frame.EventData)})
+	if err != nil {
+		return err
+	}
+
+	// 定期刷新文件到磁盘
+	// 每10帧左右刷新一次，这是一个平衡点
+	if frame.Time > 0 && int(frame.Time*10)%10 == 0 {
+		sw.file.Sync()
+	}
+
+	return nil
 }
 
 // 关闭文件
@@ -56,7 +72,12 @@ func (sw *StreamWriter) Close() error {
 	defer sw.mu.Unlock()
 
 	if sw.file != nil {
-		return sw.file.Close()
+		// 最后一次刷新确保所有数据写入磁盘
+		sw.file.Sync()
+		err := sw.file.Close()
+		// 关闭后立即修复文件格式
+		FixCast(sw.filePath)
+		return err
 	}
 	return nil
 }
@@ -98,13 +119,49 @@ func (r *Runner) Rec() error {
 		if err != nil {
 			return err
 		}
-		defer streamWriter.Close()
+		// 使用defer确保无论如何退出都会关闭文件并修复格式
+		defer func() {
+			streamWriter.Close()
+			// 再次修复文件格式，以应对任何情况
+			FixCast(r.FilePath)
+		}()
+
+		// 设置信号处理，捕获退出信号以修复文件格式
+		signalChan := make(chan os.Signal, 1)
+		signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM)
+
+		// 创建一个完成通道，用于正常退出时的信号
+		done := make(chan struct{})
+
+		go func() {
+			select {
+			case <-signalChan:
+				// 信号退出
+				streamWriter.Close()
+				os.Exit(0)
+			case <-done:
+				// 正常退出，不做任何事
+				return
+			}
+		}()
 
 		// 执行流式录制
 		cast, err := streamRecorder.ExecuteWithCallback(command, r.Title, r.AssumeYes, r.MaxWait,
 			func(frame asciicast.Frame) {
+				// 捕获写入过程中的任何可能异常
+				defer func() {
+					if r := recover(); r != nil {
+						// 如果写入过程中panic，确保文件被修复
+						streamWriter.Close()
+						FixCast(streamWriter.filePath)
+					}
+				}()
+
 				streamWriter.WriteFrame(frame)
 			})
+
+		// 通知信号处理协程已完成
+		close(done)
 
 		if err != nil {
 			return err
@@ -112,9 +169,8 @@ func (r *Runner) Rec() error {
 		r.Cast = &cast
 
 		// 流式写入已经完成，修复文件格式
-		if err == nil {
-			FixCast(r.FilePath)
-		}
+		FixCast(r.FilePath)
+
 		return err
 	}
 
