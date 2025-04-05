@@ -11,6 +11,7 @@ type Stream struct {
 	lastWriteTime time.Time
 	maxWait       time.Duration
 	lock          *sync.Mutex
+	callback      func(frame Frame)
 }
 
 func NewStream(maxWait float64) *Stream {
@@ -24,6 +25,19 @@ func NewStream(maxWait float64) *Stream {
 	}
 }
 
+// 创建支持回调的Stream
+func NewStreamWithCallback(maxWait float64, callback func(frame Frame)) *Stream {
+	if maxWait <= 0 {
+		maxWait = 1.0
+	}
+	return &Stream{
+		lastWriteTime: time.Now(),
+		maxWait:       time.Duration(maxWait*1000000) * time.Microsecond,
+		lock:          &sync.Mutex{},
+		callback:      callback,
+	}
+}
+
 func (s *Stream) Write(p []byte) (int, error) {
 	frame := Frame{}
 	frame.EventType = "o"
@@ -32,13 +46,18 @@ func (s *Stream) Write(p []byte) (int, error) {
 	copy(frame.EventData, p)
 	s.Frames = append(s.Frames, frame)
 
+	// 如果有回调函数，实时调用回调处理帧数据
+	if s.callback != nil {
+		s.callback(frame)
+	}
+
 	return len(p), nil
 }
 
 func (s *Stream) Close() {
 	s.incrementElapsedTime()
 
-	if string(s.Frames[len(s.Frames)-1].EventData) == "exit\r\n" {
+	if len(s.Frames) > 0 && string(s.Frames[len(s.Frames)-1].EventData) == "exit\r\n" {
 		s.Frames = s.Frames[:len(s.Frames)-1]
 	}
 }

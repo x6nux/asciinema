@@ -117,12 +117,19 @@ func (c *Cli) initiate() {
 				return
 			}
 			c.cmd.Title, c.cmd.FilePath = handleFilePath(args[0])
+
+			// 设置流式写入选项
+			streamWrite, _ := cc.Flags().GetBool("stream-write")
+			c.cmd.StreamWrite = streamWrite
+
 			err := c.cmd.Rec()
 			if err != nil {
 				gprint.PrintError("record failed: %+v", err)
 			}
 		},
 	}
+	// 添加流式写入选项
+	record.Flags().BoolP("stream-write", "w", false, "Enable stream writing to prevent recording loss when terminal is closed unexpectedly")
 	c.rootCmd.AddCommand(record)
 
 	// Play.
