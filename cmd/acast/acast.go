@@ -122,6 +122,10 @@ func (c *Cli) initiate() {
 			streamWrite, _ := cc.Flags().GetBool("stream-write")
 			c.cmd.StreamWrite = streamWrite
 
+			// 设置安静模式选项
+			quiet, _ := cc.Flags().GetBool("quiet")
+			c.cmd.Quite = quiet
+
 			err := c.cmd.Rec()
 			if err != nil {
 				gprint.PrintError("record failed: %+v", err)
@@ -130,6 +134,8 @@ func (c *Cli) initiate() {
 	}
 	// 添加流式写入选项
 	record.Flags().BoolP("stream-write", "w", false, "Enable stream writing to prevent recording loss when terminal is closed unexpectedly")
+	// 添加安静模式选项
+	record.Flags().BoolP("quiet", "q", false, "Quiet mode, no terminal size warning and confirmation prompt")
 	c.rootCmd.AddCommand(record)
 
 	// Play.

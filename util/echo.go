@@ -3,14 +3,13 @@ package util
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 )
 
 var loggerOutput io.Writer = os.Stdout
 
 func BeQuiet() {
-	loggerOutput = ioutil.Discard
+	loggerOutput = io.Discard
 }
 
 func Printf(s string, args ...interface{}) {
