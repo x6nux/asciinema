@@ -8,8 +8,8 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/gvcgo/asciinema/asciicast"
-	"github.com/gvcgo/asciinema/util"
+	"github.com/x6nux/asciinema/asciicast"
+	"github.com/x6nux/asciinema/util"
 )
 
 type Runner struct {

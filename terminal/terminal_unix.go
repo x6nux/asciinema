@@ -13,7 +13,7 @@ import (
 
 	"github.com/creack/pty"
 	"github.com/creack/termios/raw"
-	"github.com/gvcgo/asciinema/util"
+	"github.com/x6nux/asciinema/util"
 
 	// "golang.org/x/crypto/ssh/terminal"
 	terminal "golang.org/x/term"

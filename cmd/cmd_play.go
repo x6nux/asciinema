@@ -6,8 +6,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/gvcgo/asciinema/asciicast"
-	"github.com/gvcgo/asciinema/commands"
+	"github.com/x6nux/asciinema/asciicast"
+	"github.com/x6nux/asciinema/commands"
 )
 
 func (r *Runner) Play() error {

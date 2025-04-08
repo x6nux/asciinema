@@ -8,7 +8,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/gvcgo/asciinema/util"
+	"github.com/x6nux/asciinema/util"
 )
 
 func (r *AsciicastRecorder) checkTerminalSize() chan<- bool {

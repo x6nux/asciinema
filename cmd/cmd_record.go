@@ -9,10 +9,10 @@ import (
 	"sync"
 	"syscall"
 
-	"github.com/gvcgo/asciinema/asciicast"
-	"github.com/gvcgo/asciinema/commands"
-	"github.com/gvcgo/asciinema/util"
 	"github.com/olivere/ndjson"
+	"github.com/x6nux/asciinema/asciicast"
+	"github.com/x6nux/asciinema/commands"
+	"github.com/x6nux/asciinema/util"
 )
 
 // 流式写入的结构体

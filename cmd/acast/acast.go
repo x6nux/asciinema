@@ -8,11 +8,11 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/gvcgo/asciinema/cmd"
-	"github.com/gvcgo/asciinema/util"
 	"github.com/gvcgo/goutils/pkgs/gtea/gprint"
 	"github.com/gvcgo/goutils/pkgs/gutils"
 	"github.com/spf13/cobra"
+	"github.com/x6nux/asciinema/cmd"
+	"github.com/x6nux/asciinema/util"
 )
 
 var (

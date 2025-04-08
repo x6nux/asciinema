@@ -1,10 +1,10 @@
-[![Go Report Card](https://img.shields.io/badge/go%20report-A+-brightgreen.svg?style=for-the-badge)](https://github.com/gvcgo/asciinema)
+[![Go Report Card](https://img.shields.io/badge/go%20report-A+-brightgreen.svg?style=for-the-badge)](https://github.com/x6nux/asciinema)
 [![GitHub License](https://img.shields.io/github/license/gvcgo/asciinema?style=for-the-badge)](LICENSE)
-[![GitHub Release](https://img.shields.io/github/v/release/gvcgo/asciinema?display_name=tag&style=for-the-badge)](https://github.com/gvcgo/asciinema/releases)
-[![PRs Card](https://img.shields.io/badge/PRs-acast-cyan.svg?style=for-the-badge)](https://github.com/gvcgo/asciinema/pulls)
-[![Issues Card](https://img.shields.io/badge/Issues-acast-pink.svg?style=for-the-badge)](https://github.com/gvcgo/asciinema/issues)
+[![GitHub Release](https://img.shields.io/github/v/release/gvcgo/asciinema?display_name=tag&style=for-the-badge)](https://github.com/x6nux/asciinema/releases)
+[![PRs Card](https://img.shields.io/badge/PRs-acast-cyan.svg?style=for-the-badge)](https://github.com/x6nux/asciinema/pulls)
+[![Issues Card](https://img.shields.io/badge/Issues-acast-pink.svg?style=for-the-badge)](https://github.com/x6nux/asciinema/issues)
 
-[中文](https://github.com/gvcgo/asciinema/blob/main/docs/README_CN.md) | [En](https://github.com/gvcgo/asciinema)
+[中文](https://github.com/x6nux/asciinema/blob/main/docs/README_CN.md) | [En](https://github.com/x6nux/asciinema)
 
 ------------
 
@@ -30,11 +30,11 @@
 
 - 通过**go**自带命令进行安装**acast**.
 ```bash
-go install github.com/gvcgo/asciinema/cmd/acast@latest
+go install github.com/x6nux/asciinema/cmd/acast@latest
 ```
 
 - 从**releases**页面下载后手动解压.
-[releases](https://github.com/gvcgo/asciinema/releases)
+[releases](https://github.com/x6nux/asciinema/releases)
 
 ------------
 ## 子命令介绍

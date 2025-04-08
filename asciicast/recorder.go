@@ -3,8 +3,8 @@ package asciicast
 import (
 	"os"
 
-	"github.com/gvcgo/asciinema/terminal"
-	"github.com/gvcgo/asciinema/util"
+	"github.com/x6nux/asciinema/terminal"
+	"github.com/x6nux/asciinema/util"
 )
 
 const (

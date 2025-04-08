@@ -1,6 +1,6 @@
 package commands
 
-import "github.com/gvcgo/asciinema/asciicast"
+import "github.com/x6nux/asciinema/asciicast"
 
 type PlayCommand struct {
 	Player asciicast.Player
