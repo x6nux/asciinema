@@ -200,24 +200,44 @@ func (c *Cli) initiate() {
 	}
 	c.rootCmd.AddCommand(upload)
 
-	// Convert to gif.
-	convert := &cobra.Command{
-		Use:     "convert-to-gif",
-		Aliases: []string{"cg"},
+	// Convert to GIF.
+	convertGif := &cobra.Command{
+		Use:     "gif",
+		Aliases: []string{"g"},
 		GroupID: GroupID,
-		Short:   "Converts an asciinema cast to gif.",
-		Long:    "Example: acast cg <input.cast> <output.gif>",
+		Short:   "Convert a record file to gif image.",
+		Long:    "Example: acast gif <xxx.cast>",
 		Run: func(cc *cobra.Command, args []string) {
-			if len(args) < 2 {
+			if len(args) == 0 {
 				cc.Help()
 				return
 			}
-			if err := c.cmd.ConvertToGif(args[0], args[1]); err != nil {
-				gprint.PrintError("convert failed: %+v", err)
+			if err := c.cmd.ConvertToGif(args[0], args[0]); err != nil {
+				gprint.PrintError("convert to gif failed: %+v", err)
 			}
 		},
 	}
-	c.rootCmd.AddCommand(convert)
+	c.rootCmd.AddCommand(convertGif)
+
+	// 添加 ToJSON 命令
+	toJSON := &cobra.Command{
+		Use:     "tojson",
+		Aliases: []string{"tj"},
+		GroupID: GroupID,
+		Short:   "Convert a record file to simplified JSON format.",
+		Long:    "Example: acast tojson <xxx.cast>",
+		Run: func(cc *cobra.Command, args []string) {
+			if len(args) == 0 {
+				cc.Help()
+				return
+			}
+			c.cmd.Title, c.cmd.FilePath = handleFilePath(args[0])
+			if err := c.cmd.ToJSON(); err != nil {
+				gprint.PrintError("转换为JSON失败: %+v", err)
+			}
+		},
+	}
+	c.rootCmd.AddCommand(toJSON)
 
 	// Cut.
 	cut := &cobra.Command{
