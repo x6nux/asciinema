@@ -13,25 +13,29 @@ import (
 )
 
 type Runner struct {
-	Title        string
-	MaxWait      float64
-	AssumeYes    bool
-	Quite        bool
-	FilePath     string
-	Cast         *asciicast.Asciicast
-	StreamWrite  bool
-	SyncInterval int64 // 同步间隔（毫秒）
+	Title           string
+	MaxWait         float64
+	AssumeYes       bool
+	Quite           bool
+	FilePath        string
+	Cast            *asciicast.Asciicast
+	StreamWrite     bool
+	SyncInterval    int64 // 同步间隔（毫秒）
+	DisableCompress bool  // 是否禁用压缩
+	CompressRatio   int   // 压缩比例，值越大压缩效果越明显但可能影响回放质量
 }
 
 func New(filename ...string) (r *Runner) {
 	r = &Runner{
-		Title:        "asciinema_default",
-		MaxWait:      1.0,
-		AssumeYes:    false,
-		Quite:        false,
-		FilePath:     "asciinema_default.cast",
-		StreamWrite:  false,
-		SyncInterval: 500, // 默认500毫秒
+		Title:           "asciinema_default",
+		MaxWait:         1.0,
+		AssumeYes:       false,
+		Quite:           false,
+		FilePath:        "asciinema_default.cast",
+		StreamWrite:     false,
+		SyncInterval:    500,   // 默认500毫秒
+		DisableCompress: false, // 默认启用压缩
+		CompressRatio:   8,     // 默认压缩比例为8
 	}
 	if len(filename) > 0 {
 		r.FilePath = filename[0]

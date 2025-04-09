@@ -6,11 +6,10 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"regexp"
 	"runtime"
 	"strings"
 	"time"
-
-	"golang.org/x/net/html"
 )
 
 type Env struct {
@@ -77,33 +76,21 @@ type Header struct {
 // asciinema play ipfs://ipfs/QmbdpNCwqeZgnmAWBCQcs8u6Ts6P2ku97tfKAycE1XY88p
 // asciinema play -
 
-func getAttr(t *html.Token, name string) string {
-	for _, a := range t.Attr {
-		if a.Key == name {
-			return a.Val
-		}
-	}
-
-	return ""
-}
-
 func extractJSONURL(htmlDoc io.Reader) (string, error) {
-	z := html.NewTokenizer(htmlDoc)
-
-	for {
-		tt := z.Next()
-
-		switch {
-		case tt == html.ErrorToken:
-			return "", fmt.Errorf("expected alternate <link> not found in fetched HTML document")
-		case tt == html.StartTagToken:
-			t := z.Token()
-
-			if t.Data == "link" && getAttr(&t, "rel") == "alternate" && getAttr(&t, "type") == "application/asciicast+json" {
-				return getAttr(&t, "href"), nil
-			}
-		}
+	data, err := io.ReadAll(htmlDoc)
+	if err != nil {
+		return "", err
 	}
+
+	// 使用正则表达式查找alternate链接
+	re := regexp.MustCompile(`<link[^>]+rel=["']alternate["'][^>]+type=["']application/asciicast\+json["'][^>]+href=["']([^"']+)["'][^>]*>`)
+	matches := re.FindSubmatch(data)
+
+	if len(matches) < 2 {
+		return "", fmt.Errorf("expected alternate <link> not found in fetched HTML document")
+	}
+
+	return string(matches[1]), nil
 }
 
 func getSource(url string) (io.ReadCloser, error) {
@@ -175,4 +162,48 @@ func Load(url string) (*Asciicast, error) {
 	}
 
 	return asciicast, nil
+}
+
+// 实现terminal.Cast接口
+func (a *Asciicast) GetWidth() int {
+	return a.Width
+}
+
+func (a *Asciicast) GetHeight() int {
+	return a.Height
+}
+
+func (a *Asciicast) GetFrames() interface{} {
+	return a.Stdout
+}
+
+// Frames 返回这个Asciicast的所有帧，满足terminal包中的类型断言需要
+func (a *Asciicast) Frames() []interface{} {
+	frames := make([]interface{}, len(a.Stdout))
+	for i, f := range a.Stdout {
+		frame := f // 创建局部变量避免引用问题
+		frames[i] = &frame
+	}
+	return frames
+}
+
+// 实现terminal.Frame接口
+func (f *Frame) GetTime() float64 {
+	return f.Time
+}
+
+func (f *Frame) GetEventType() string {
+	return f.EventType
+}
+
+func (f *Frame) GetEventData() []byte {
+	return f.EventData
+}
+
+// CompressedFrameData 结构用于压缩帧数据的序列化和反序列化
+type CompressedFrameData struct {
+	Compressed bool      `json:"compressed"`
+	Timestamps []float64 `json:"timestamps"`
+	Offsets    []int     `json:"offsets"`
+	Data       string    `json:"data"`
 }

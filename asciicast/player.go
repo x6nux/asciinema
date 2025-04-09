@@ -2,20 +2,22 @@ package asciicast
 
 import (
 	"time"
-
-	"github.com/x6nux/asciinema/terminal"
 )
+
+type PlayerTerminal interface {
+	Write([]byte) (int, error)
+}
 
 type Player interface {
 	Play(*Asciicast, float64) error
 }
 
 type AsciicastPlayer struct {
-	Terminal terminal.Terminal
+	Terminal PlayerTerminal
 }
 
-func NewPlayer() Player {
-	return &AsciicastPlayer{Terminal: terminal.NewTerminal()}
+func NewPlayer(terminal PlayerTerminal) Player {
+	return &AsciicastPlayer{Terminal: terminal}
 }
 
 func (r *AsciicastPlayer) Play(asciicast *Asciicast, maxWait float64) error {

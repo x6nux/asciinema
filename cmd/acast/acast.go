@@ -132,6 +132,16 @@ func (c *Cli) initiate() {
 				c.cmd.SyncInterval = syncInterval
 			}
 
+			// 设置是否禁用压缩
+			disableCompress, _ := cc.Flags().GetBool("disable-compress")
+			c.cmd.DisableCompress = disableCompress
+
+			// 设置压缩比例
+			compressRatio, _ := cc.Flags().GetInt("compress-ratio")
+			if compressRatio > 0 {
+				c.cmd.CompressRatio = compressRatio
+			}
+
 			err := c.cmd.Rec()
 			if err != nil {
 				gprint.PrintError("record failed: %+v", err)
@@ -144,6 +154,10 @@ func (c *Cli) initiate() {
 	record.Flags().BoolP("quiet", "q", false, "Quiet mode, no terminal size warning and confirmation prompt")
 	// 添加同步间隔选项，默认500毫秒
 	record.Flags().Int64P("sync-interval", "i", 500, "Sync interval in milliseconds for stream writing (default: 500ms)")
+	// 添加禁用压缩选项
+	record.Flags().BoolP("disable-compress", "d", false, "Disable output compression (default: false)")
+	// 添加压缩比例选项，默认8
+	record.Flags().IntP("compress-ratio", "c", 8, "Compression ratio for repeated content, higher value means stronger compression (default: 8)")
 	c.rootCmd.AddCommand(record)
 
 	// Play.

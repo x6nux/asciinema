@@ -1,14 +1,17 @@
 package commands
 
-import "github.com/x6nux/asciinema/asciicast"
+import (
+	"github.com/x6nux/asciinema/asciicast"
+	"github.com/x6nux/asciinema/terminal"
+)
 
 type PlayCommand struct {
-	Player asciicast.Player
+	Player terminal.Player
 }
 
 func NewPlayCommand() *PlayCommand {
 	return &PlayCommand{
-		Player: asciicast.NewPlayer(),
+		Player: terminal.NewPlayer(),
 	}
 }
 
