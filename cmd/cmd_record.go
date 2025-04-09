@@ -8,6 +8,7 @@ import (
 	"runtime"
 	"sync"
 	"syscall"
+	"time"
 
 	"github.com/olivere/ndjson"
 	"github.com/x6nux/asciinema/asciicast"
@@ -15,13 +16,20 @@ import (
 	"github.com/x6nux/asciinema/util"
 )
 
+// 获取当前时间的毫秒值
+func currentTimeMs() int64 {
+	return time.Now().UnixNano() / int64(time.Millisecond)
+}
+
 // 流式写入的结构体
 type StreamWriter struct {
-	file     *os.File
-	writer   *ndjson.Writer
-	mu       sync.Mutex
-	written  bool
-	filePath string
+	file           *os.File
+	writer         *ndjson.Writer
+	mu             sync.Mutex
+	written        bool
+	filePath       string
+	lastSyncTime   int64 // 上次同步时间（毫秒）
+	syncIntervalMs int64 // 同步间隔（毫秒）
 }
 
 // 创建新的流式写入器
@@ -40,10 +48,12 @@ func NewStreamWriter(filepath string, header *asciicast.Header) (*StreamWriter, 
 
 	// 设置文件缓冲区以减少写入操作数量
 	return &StreamWriter{
-		file:     file,
-		writer:   ndjson.NewWriter(file),
-		written:  true,
-		filePath: filepath,
+		file:           file,
+		writer:         ndjson.NewWriter(file),
+		written:        true,
+		filePath:       filepath,
+		lastSyncTime:   0,
+		syncIntervalMs: 500, // 默认500毫秒同步一次
 	}, nil
 }
 
@@ -57,10 +67,11 @@ func (sw *StreamWriter) WriteFrame(frame asciicast.Frame) error {
 		return err
 	}
 
-	// 定期刷新文件到磁盘
-	// 每10帧左右刷新一次，这是一个平衡点
-	if frame.Time > 0 && int(frame.Time*10)%10 == 0 {
+	// 基于时间的同步策略，减少file.Sync()调用频率
+	currentTime := currentTimeMs()
+	if currentTime-sw.lastSyncTime >= sw.syncIntervalMs {
 		sw.file.Sync()
+		sw.lastSyncTime = currentTime
 	}
 
 	return nil
@@ -119,6 +130,12 @@ func (r *Runner) Rec() error {
 		if err != nil {
 			return err
 		}
+
+		// 如果设置了同步间隔，则更新
+		if r.SyncInterval > 0 {
+			streamWriter.syncIntervalMs = r.SyncInterval
+		}
+
 		// 使用defer确保无论如何退出都会关闭文件并修复格式
 		defer func() {
 			streamWriter.Close()

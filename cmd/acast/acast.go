@@ -126,6 +126,12 @@ func (c *Cli) initiate() {
 			quiet, _ := cc.Flags().GetBool("quiet")
 			c.cmd.Quite = quiet
 
+			// 设置同步间隔选项
+			syncInterval, _ := cc.Flags().GetInt64("sync-interval")
+			if syncInterval > 0 {
+				c.cmd.SyncInterval = syncInterval
+			}
+
 			err := c.cmd.Rec()
 			if err != nil {
 				gprint.PrintError("record failed: %+v", err)
@@ -136,6 +142,8 @@ func (c *Cli) initiate() {
 	record.Flags().BoolP("stream-write", "w", false, "Enable stream writing to prevent recording loss when terminal is closed unexpectedly")
 	// 添加安静模式选项
 	record.Flags().BoolP("quiet", "q", false, "Quiet mode, no terminal size warning and confirmation prompt")
+	// 添加同步间隔选项，默认500毫秒
+	record.Flags().Int64P("sync-interval", "i", 500, "Sync interval in milliseconds for stream writing (default: 500ms)")
 	c.rootCmd.AddCommand(record)
 
 	// Play.

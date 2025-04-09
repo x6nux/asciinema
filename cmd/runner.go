@@ -13,23 +13,25 @@ import (
 )
 
 type Runner struct {
-	Title       string
-	MaxWait     float64
-	AssumeYes   bool
-	Quite       bool
-	FilePath    string
-	Cast        *asciicast.Asciicast
-	StreamWrite bool
+	Title        string
+	MaxWait      float64
+	AssumeYes    bool
+	Quite        bool
+	FilePath     string
+	Cast         *asciicast.Asciicast
+	StreamWrite  bool
+	SyncInterval int64 // 同步间隔（毫秒）
 }
 
 func New(filename ...string) (r *Runner) {
 	r = &Runner{
-		Title:       "asciinema_default",
-		MaxWait:     1.0,
-		AssumeYes:   false,
-		Quite:       false,
-		FilePath:    "asciinema_default.cast",
-		StreamWrite: false,
+		Title:        "asciinema_default",
+		MaxWait:      1.0,
+		AssumeYes:    false,
+		Quite:        false,
+		FilePath:     "asciinema_default.cast",
+		StreamWrite:  false,
+		SyncInterval: 500, // 默认500毫秒
 	}
 	if len(filename) > 0 {
 		r.FilePath = filename[0]
